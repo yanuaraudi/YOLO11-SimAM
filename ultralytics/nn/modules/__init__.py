@@ -16,7 +16,7 @@ Examples:
     >>> torch.onnx.export(m, x, f)
     >>> os.system(f"onnxslim {f} {f} && open {f}")  # pip install onnxslim
 """
-from .custom_modules import SimAM, CBAM
+from .custom_modules import SimAM, CBAM, ECA
 from .block import (
     C1,
     C2,
@@ -180,5 +180,6 @@ __all__ = (
     "Index",
     "A2C2f",
     "SimAM",
-    "CBAM"
+    "CBAM",
+    "ECA",
 )

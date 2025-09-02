@@ -1,3 +1,4 @@
+import math
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
@@ -72,3 +73,38 @@ class CBAM(nn.Module):
         x = self.ca(x)
         x = self.sa(x)
         return x
+    
+    
+#ECAnet
+
+class ECA(nn.Module):
+    """
+    Efficient Channel Attention (ECA-Net).
+    - Tanpa MLP/reduction: pakai GAP (B,C,1,1) -> Conv1d(1,1,k) di dimensi channel -> sigmoid -> scale.
+    Args:
+        c (int): jumlah channel input
+        gamma (int|float): faktor skala untuk menghitung k
+        b (int|float): bias untuk menghitung k
+        k_size (int|None): kalau None, dihitung adaptif dari c; kalau diberikan, harus bilangan ganjil >= 3
+    """
+    def __init__(self, c: int, gamma: float = 2, b: float = 1, k_size: int | None = None):
+        super().__init__()
+        if k_size is None:
+            t = int(abs((math.log2(c) + b) / gamma))
+            k_size = t if t % 2 else t + 1
+            k_size = max(3, k_size)  # minimal 3 dan selalu ganjil
+        else:
+            if k_size % 2 == 0 or k_size < 3:
+                raise ValueError("k_size must be odd and >= 3")
+
+        self.avg_pool = nn.AdaptiveAvgPool2d(1)
+        self.conv = nn.Conv1d(1, 1, kernel_size=k_size, padding=(k_size - 1) // 2, bias=False)
+        self.sigmoid = nn.Sigmoid()
+
+    def forward(self, x):
+        # x: [B, C, H, W]
+        y = self.avg_pool(x).squeeze(-1).squeeze(-1)  # [B, C]
+        y = y.unsqueeze(1)                             # [B, 1, C]
+        y = self.conv(y)                               # [B, 1, C]
+        y = self.sigmoid(y).squeeze(1).unsqueeze(-1).unsqueeze(-1)  # [B, C, 1, 1]
+        return x * y
