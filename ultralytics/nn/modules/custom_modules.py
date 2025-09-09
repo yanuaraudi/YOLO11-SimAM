@@ -19,26 +19,32 @@ class SimAM(torch.nn.Module):
         return x * self.activaton(y)
     
 #CBAM
+# ---------- ChannelAttention (lazy) ----------
 class ChannelAttention(nn.Module):
-    def __init__(self, channels: int, reduction: int = 16):
+    def __init__(self, channels: int | None = None, reduction: int = 16):
         super().__init__()
-        hidden = max(channels // reduction, 1)
+        self.reduction = reduction
+        self.mlp = None  # dibangun saat forward pertama
+        self._c = channels  # hint opsional
+
+    def _build(self, c: int):
+        hidden = max(c // self.reduction, 1)
         self.mlp = nn.Sequential(
-            nn.Linear(channels, hidden, bias=False),
+            nn.Linear(c, hidden, bias=False),
             nn.ReLU(inplace=True),
-            nn.Linear(hidden, channels, bias=False),
+            nn.Linear(hidden, c, bias=False),
         )
-        self.sigmoid = nn.Sigmoid()
 
     def forward(self, x):
         b, c, _, _ = x.size()
+        if self.mlp is None or self.mlp[0].in_features != c:
+            self._build(c)
         avg_pool = F.adaptive_avg_pool2d(x, 1).view(b, c)
         max_pool = F.adaptive_max_pool2d(x, 1).view(b, c)
         out = self.mlp(avg_pool) + self.mlp(max_pool)
-        out = self.sigmoid(out).view(b, c, 1, 1)
-        return x * out
+        return x * torch.sigmoid(out).view(b, c, 1, 1)
 
-
+# ---------- SpatialAttention (tetap) ----------
 class SpatialAttention(nn.Module):
     def __init__(self, kernel_size: int = 7):
         super().__init__()
@@ -46,33 +52,21 @@ class SpatialAttention(nn.Module):
         padding = 3 if kernel_size == 7 else 1
         self.conv = nn.Conv2d(2, 1, kernel_size, padding=padding, bias=False)
         self.sigmoid = nn.Sigmoid()
-
     def forward(self, x):
         avg_map = torch.mean(x, dim=1, keepdim=True)
         max_map, _ = torch.max(x, dim=1, keepdim=True)
         attn = torch.cat([avg_map, max_map], dim=1)
-        attn = self.conv(attn)
-        attn = self.sigmoid(attn)
+        attn = self.sigmoid(self.conv(attn))
         return x * attn
 
-
-class CBAM(nn.Module):
-    """
-    CBAM block.
-    Args:
-        c (int): input channels
-        reduction (int): reduction ratio in ChannelAttention
-        kernel_size (int): 3 or 7 for SpatialAttention
-    """
-    def __init__(self, c: int, reduction: int = 16, kernel_size: int = 7):
+# ---------- CBAMv2 (abaikan argumen 'c') ----------
+class CBAMv2(nn.Module):
+    def __init__(self, c: int | None = None, reduction: int = 16, kernel_size: int = 7, *_, **__):
         super().__init__()
-        self.ca = ChannelAttention(c, reduction)
+        self.ca = ChannelAttention(None, reduction)   # c autodetect
         self.sa = SpatialAttention(kernel_size)
-
     def forward(self, x):
-        x = self.ca(x)
-        x = self.sa(x)
-        return x
+        return self.sa(self.ca(x))
     
     
 #ECAnet

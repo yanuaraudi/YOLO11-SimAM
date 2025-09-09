@@ -10,6 +10,9 @@ from pathlib import Path
 import torch
 import torch.nn as nn
 
+from ultralytics.nn.modules.custom_modules import CBAMv2 as _CBAMv2
+CBAMv2 = _CBAMv2
+
 from ultralytics.nn.autobackend import check_class_names
 from ultralytics.nn.modules import (
     AIFI,
@@ -69,8 +72,9 @@ from ultralytics.nn.modules import (
     YOLOESegment,
     v10Detect,
     SimAM,
-    CBAM,
+    CBAMv2,
     ECA,
+    CBAM,
 )
 from ultralytics.utils import DEFAULT_CFG_DICT, DEFAULT_CFG_KEYS, LOGGER, YAML, colorstr, emojis
 from ultralytics.utils.checks import check_requirements, check_suffix, check_yaml
@@ -1735,6 +1739,19 @@ def parse_model(d, ch, verbose=True):
             c2 = args[0]
             c1 = ch[f]
             args = [*args[1:]]
+        elif getattr(m, "__name__", "") == "CBAM":
+            # YAML forms supported:
+            # - CBAM, []        -> kernel_size default 7
+            # - CBAM, [7]       -> kernel_size = 7
+            # - CBAM, [c, 7]    -> kernel_size = 7 (c diabaikan dan diganti ch[f])
+            if len(args) == 0:
+                k = 7
+            elif len(args) == 1:
+                k = int(args[0])  # single arg = kernel_size
+            else:
+                k = int(args[1])  # (c, kernel_size) -> pakai kernel_size
+            args = [ch[f], k]     # paksa c1 = ch[f] (jumlah channel aktual)
+            c2 = ch[f]            # CBAM tidak mengubah dim channel keluaran
         else:
             c2 = ch[f]
 
