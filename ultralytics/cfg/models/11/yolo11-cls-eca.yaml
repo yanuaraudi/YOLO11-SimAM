@@ -6,6 +6,7 @@
 
 # Parameters
 nc: 3
+scales:
 
 backbone:
   # [from, repeats, module, args]
