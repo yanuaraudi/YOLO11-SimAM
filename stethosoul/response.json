@@ -1,0 +1,4 @@
+{ "id": "Q1", "mode": "pqb | speech", "text": ".....", "options": [ { "key": "A", "label": "Sangat Tidak Setuju" }, { "key": "B", "label": "Tidak Setuju" }  ] }
+
+
+{ "session_id": "S-001", "meta": { "type": "stethosoul_plus", "total_questions": 44}, "questions": [{ "id": "Q1", "mode": "pqb | speech", "text": ".....", "options": [ { "key": "A", "label": "Sangat Tidak Setuju" }, { "key": "B", "label": "Tidak Setuju" }  ] } ] }

@@ -1,0 +1,5 @@
+path: /content/drive/MyDrive/YOLO/mosquito_dataset_cls
+train: train
+val: val
+test: test
+names: [aedes_aegypti, aedes_albopictus, culex_quinquefasciatus]
