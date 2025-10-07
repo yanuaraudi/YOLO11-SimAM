@@ -72,15 +72,6 @@ class CBAMv2(nn.Module):
 #ECAnet
 
 class ECA(nn.Module):
-    """
-    Efficient Channel Attention (ECA-Net).
-    - Tanpa MLP/reduction: pakai GAP (B,C,1,1) -> Conv1d(1,1,k) di dimensi channel -> sigmoid -> scale.
-    Args:
-        c (int): jumlah channel input
-        gamma (int|float): faktor skala untuk menghitung k
-        b (int|float): bias untuk menghitung k
-        k_size (int|None): kalau None, dihitung adaptif dari c; kalau diberikan, harus bilangan ganjil >= 3
-    """
     def __init__(self, c: int, gamma: float = 2, b: float = 1, k_size: int | None = None):
         super().__init__()
         if k_size is None:

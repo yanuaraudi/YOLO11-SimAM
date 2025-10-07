@@ -177,3 +177,6 @@ calibration_*.npy
 
 # My custom dataset
 mosquito_dataset/
+
+# Personal Run
+runs/
