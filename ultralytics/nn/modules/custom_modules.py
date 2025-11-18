@@ -2,6 +2,7 @@ import math
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
+import torchvision
 
 
 # SimAM
@@ -93,3 +94,87 @@ class ECA(nn.Module):
         y = self.conv(y)                               # [B, 1, C]
         y = self.sigmoid(y).squeeze(1).unsqueeze(-1).unsqueeze(-1)  # [B, C, 1, 1]
         return x * y
+
+class ECAResNet18Backbone(nn.Module):
+    def __init__(self, c_out=512):
+        super().__init__()
+        # Load a standard, pretrained ResNet18
+        # The weights are loaded *here*
+        model = torchvision.models.resnet18(weights='DEFAULT')
+        
+        # "Steal" all the layers from the pretrained model
+        # This keeps all the pretrained weights
+        self.conv1 = model.conv1
+        self.bn1 = model.bn1
+        self.relu = model.relu
+        self.maxpool = model.maxpool
+        self.layer1 = model.layer1  # output: 64 channels
+        self.layer2 = model.layer2  # output: 128 channels
+        self.layer3 = model.layer3  # output: 256 channels
+        self.layer4 = model.layer4  # output: 512 channels
+        
+        # Define our new attention module
+        # We place it *after* layer4, to refine the final feature map
+        self.eca = ECA(c=512) # 512 channels from layer4
+        
+        # This is for Ultralytics to know the output channel size
+        self.c_out = c_out
+
+    def forward(self, x):
+        # Pass input through the standard ResNet blocks
+        x = self.conv1(x)
+        x = self.bn1(x)
+        x = self.relu(x)
+        x = self.maxpool(x)
+        
+        x = self.layer1(x)
+        x = self.layer2(x)
+        x = self.layer3(x)
+        x = self.layer4(x)
+        
+        # --- HERE IS YOUR PROPOSAL ---
+        # Pass the final feature map through the ECA module
+        x = self.eca(x)
+        
+        return x
+
+class SimAMResNet18Backbone(nn.Module):
+    def __init__(self, c_out=512):
+        super().__init__()
+        # Load a standard, pretrained ResNet18
+        model = torchvision.models.resnet18(weights='DEFAULT')
+        
+        # "Steal" all the layers
+        self.conv1 = model.conv1
+        self.bn1 = model.bn1
+        self.relu = model.relu
+        self.maxpool = model.maxpool
+        self.layer1 = model.layer1
+        self.layer2 = model.layer2
+        self.layer3 = model.layer3
+        self.layer4 = model.layer4
+        
+        # Define our new attention module
+        # SimAM doesn't need the channel count in its init
+        self.simam = SimAM()
+        
+        # This is for Ultralytics
+        self.c_out = c_out
+
+    def forward(self, x):
+        # Pass input through the standard ResNet blocks
+        x = self.conv1(x)
+        x = self.bn1(x)
+        x = self.relu(x)
+        x = self.maxpool(x)
+        
+        x = self.layer1(x)
+        x = self.layer2(x)
+        x = self.layer3(x)
+        x = self.layer4(x)
+        
+        # --- HERE IS YOUR PROPOSAL ---
+        # Pass the final feature map through the SimAM module
+        x = self.simam(x)
+        
+        return x
