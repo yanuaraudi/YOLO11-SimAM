@@ -14,4 +14,4 @@ backbone:
 
 # YOLO11n head
 head:
-  - [-1, 1, Classify, [512, nc]]  # 512 input channels, nc classes
+  - [-1, 1, ECAClassifyHead, [nc]]  # <-- use your wrapper
