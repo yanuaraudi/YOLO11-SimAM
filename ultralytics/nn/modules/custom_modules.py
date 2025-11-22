@@ -131,3 +131,15 @@ class ResNet18_ECA_Backbone(nn.Module):
         x = self.eca4(x)
         return x
 
+class ECAClassifyHead(nn.Module):
+    """
+    Simple wrapper around Ultralytics Classify head that forces c1=512
+    so it matches ResNet18_ECA_Backbone output channels.
+    """
+    def __init__(self, nc: int, c1: int = 512):
+        super().__init__()
+        # use official Ultralytics classification head but with correct input channels
+        self.head = Classify(c1, nc)
+
+    def forward(self, x):
+        return self.head(x)
