@@ -10,7 +10,7 @@ nc: 3 # number of classes
 # ResNet18 backbone
 backbone:
   # [from, repeats, module, args]
-  - [-1, 1, ECAResNet18Backbone, [512]]
+  - [-1, 1, ResNet18_ECA_Backbone, [True]]
 
 # YOLO11n head
 head:
