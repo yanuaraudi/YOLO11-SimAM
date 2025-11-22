@@ -98,15 +98,10 @@ class ECA(nn.Module):
         return x * y
 
 class ResNet18_ECA_Backbone(nn.Module):
-    """
-    Returns a feature map of shape [B, 512, H/32, W/32],
-    similar to standard ResNet18 truncated before avgpool.
-    """
     def __init__(self, pretrained: bool = True):
         super().__init__()
         base = resnet18(weights=ResNet18_Weights.DEFAULT if pretrained else None)
 
-        # Copy base layers
         self.conv1   = base.conv1
         self.bn1     = base.bn1
         self.relu    = base.relu
@@ -114,10 +109,13 @@ class ResNet18_ECA_Backbone(nn.Module):
         self.layer1  = base.layer1
         self.layer2  = base.layer2
         self.layer3  = base.layer3
-        self.layer4  = base.layer4  # output: [B, 512, H/32, W/32]
+        self.layer4  = base.layer4
 
-        # ECA on layer4 output (512 channels)
         self.eca4 = ECA(c=512)
+
+        # 🔴 ADD THESE LINES:
+        self.out_channels = 512
+        self.c2 = 512
 
     def forward(self, x):
         x = self.conv1(x)
@@ -130,5 +128,6 @@ class ResNet18_ECA_Backbone(nn.Module):
         x = self.layer3(x)
         x = self.layer4(x)
 
-        x = self.eca4(x)  # attention here
-        return x  # feature map, not pooled
+        x = self.eca4(x)
+        return x
+
