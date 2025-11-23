@@ -76,7 +76,10 @@ from ultralytics.nn.modules import (
     ECA,
     CBAM,
     ResNet18_ECA_Backbone,
-    ECAClassifyHead
+    ECAClassifyHead.
+    GeM,
+    GeMHead512,
+    BottleneckHead512,
     
 )
 from ultralytics.utils import DEFAULT_CFG_DICT, DEFAULT_CFG_KEYS, LOGGER, YAML, colorstr, emojis

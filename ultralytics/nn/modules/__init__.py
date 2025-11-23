@@ -16,7 +16,17 @@ Examples:
     >>> torch.onnx.export(m, x, f)
     >>> os.system(f"onnxslim {f} {f} && open {f}")  # pip install onnxslim
 """
-from .custom_modules import SimAM, CBAMv2, ECA, ResNet18_ECA_Backbone, ECAClassifyHead
+from .custom_modules import (
+    SimAM,
+    CBAMv2,
+    ECA,
+    ResNet18_ECA_Backbone,
+    ECAClassifyHead,
+    GeMHead512,
+    GeM,
+    BottleneckHead512
+)
+    
 from .block import (
     C1,
     C2,
@@ -184,4 +194,7 @@ __all__ = (
     "ECA",
     "ResNet18_ECA_Backbone",
     "ECAClassifyHead",
+    "GeMHead512",
+    "GeM",
+    "BottleneckHead512",
 )

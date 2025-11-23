@@ -143,3 +143,48 @@ class ECAClassifyHead(nn.Module):
 
     def forward(self, x):
         return self.head(x)
+
+class GeM(nn.Module):
+    def __init__(self, p=3.0, eps=1e-6):
+        super().__init__()
+        self.p = nn.Parameter(torch.ones(1) * p)
+        self.eps = eps
+
+    def forward(self, x):
+        # x: [B, C, H, W]
+        x = torch.clamp(x, min=self.eps)
+        x = x ** self.p
+        x = torch.mean(x, dim=(2, 3))  # [B, C]
+        x = x ** (1.0 / self.p)
+        return x
+
+
+class GeMHead512(nn.Module):
+    def __init__(self, nc: int, c1: int = 512):
+        super().__init__()
+        self.pool = GeM()
+        self.fc = nn.Linear(c1, nc)
+
+    def forward(self, x):
+        x = self.pool(x)
+        x = self.fc(x)
+        return x
+    
+class BottleneckHead512(nn.Module):
+    def __init__(self, nc: int, c1: int = 512, hidden: int = 128):
+        super().__init__()
+        self.pool = nn.AdaptiveAvgPool2d(1)
+        self.fc = nn.Sequential(
+            nn.Flatten(),
+            nn.Linear(c1, hidden),
+            nn.ReLU(inplace=True),
+            nn.Dropout(0.5),
+            nn.Linear(hidden, nc),
+        )
+
+    def forward(self, x):
+        x = self.pool(x)
+        x = self.fc(x)
+        return x
+
+ 
