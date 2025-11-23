@@ -76,7 +76,7 @@ from ultralytics.nn.modules import (
     ECA,
     CBAM,
     ResNet18_ECA_Backbone,
-    ECAClassifyHead.
+    ECAClassifyHead,
     GeM,
     GeMHead512,
     BottleneckHead512,
