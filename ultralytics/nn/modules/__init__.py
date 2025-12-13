@@ -24,7 +24,8 @@ from .custom_modules import (
     ECAClassifyHead,
     GeMHead512,
     GeM,
-    BottleneckHead512
+    BottleneckHead512,
+    SE
 )
     
 from .block import (
@@ -197,4 +198,5 @@ __all__ = (
     "GeMHead512",
     "GeM",
     "BottleneckHead512",
+    "SE",
 )

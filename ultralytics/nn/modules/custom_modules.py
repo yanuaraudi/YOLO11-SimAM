@@ -187,4 +187,27 @@ class BottleneckHead512(nn.Module):
         x = self.fc(x)
         return x
 
- 
+class SE(nn.Module):
+    """
+    Squeeze-and-Excitation block
+    Args:
+        c (int): number of input channels
+        r (int): reduction ratio (default 16)
+    """
+
+    def __init__(self, c, r=16):
+        super().__init__()
+        c_ = max(c // r, 1)
+
+        self.avg_pool = nn.AdaptiveAvgPool2d(1)
+        self.fc = nn.Sequential(
+            nn.Conv2d(c, c_, 1, bias=False),
+            nn.ReLU(inplace=True),
+            nn.Conv2d(c_, c, 1, bias=False),
+            nn.Sigmoid(),
+        )
+
+    def forward(self, x):
+        w = self.avg_pool(x)
+        w = self.fc(w)
+        return x * w

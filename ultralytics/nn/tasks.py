@@ -80,6 +80,7 @@ from ultralytics.nn.modules import (
     GeM,
     GeMHead512,
     BottleneckHead512,
+    SE,
     
 )
 from ultralytics.utils import DEFAULT_CFG_DICT, DEFAULT_CFG_KEYS, LOGGER, YAML, colorstr, emojis
