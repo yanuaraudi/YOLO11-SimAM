@@ -14,6 +14,6 @@ backbone:
 
 # YOLO11n head
 head:
-  - [-1, 1, GeMHead512, [512]]
+  - [-1, 1, GeMHead512, []]
   - [-1, 1, Classify, [nc]]
 

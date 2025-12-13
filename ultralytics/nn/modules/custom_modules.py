@@ -151,24 +151,20 @@ class GeM(nn.Module):
         self.eps = eps
 
     def forward(self, x):
-        # x: [B, C, H, W]
         x = torch.clamp(x, min=self.eps)
         x = x ** self.p
-        x = torch.mean(x, dim=(2, 3))  # [B, C]
+        x = torch.mean(x, dim=(2, 3), keepdim=True)  # [B, C, 1, 1]
         x = x ** (1.0 / self.p)
         return x
 
 
 class GeMHead512(nn.Module):
-    def __init__(self, nc: int, c1: int = 512):
+    def __init__(self):
         super().__init__()
         self.pool = GeM()
-        self.fc = nn.Linear(c1, nc)
 
     def forward(self, x):
-        x = self.pool(x)
-        x = self.fc(x)
-        return x
+        return self.pool(x)  # still 4D
     
 class BottleneckHead512(nn.Module):
     def __init__(self, nc: int, c1: int = 512, hidden: int = 128):
