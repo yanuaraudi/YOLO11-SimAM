@@ -207,3 +207,31 @@ class SE(nn.Module):
         w = self.avg_pool(x)
         w = self.fc(w)
         return x * w
+    
+class SpatialAttention(nn.Module):
+    def __init__(self, kernel_size=7):
+        super().__init__()
+        self.conv = nn.Conv2d(2, 1, kernel_size, padding=kernel_size // 2, bias=False)
+        self.sigmoid = nn.Sigmoid()
+
+    def forward(self, x):
+        avg_out = torch.mean(x, dim=1, keepdim=True)
+        max_out, _ = torch.max(x, dim=1, keepdim=True)
+        x = torch.cat([avg_out, max_out], dim=1)
+        return self.sigmoid(self.conv(x))
+
+class ConvProj1x1(nn.Module):
+    def __init__(self, c):
+        super().__init__()
+        self.conv = nn.Conv2d(c, c, 1, bias=False)
+        self.bn = nn.BatchNorm2d(c)
+        self.act = nn.SiLU()
+
+    def forward(self, x):
+        return self.act(self.bn(self.conv(x)))
+
+class DualPool(nn.Module):
+    def forward(self, x):
+        gap = F.adaptive_avg_pool2d(x, 1)
+        gmp = F.adaptive_max_pool2d(x, 1)
+        return torch.cat([gap, gmp], dim=1)

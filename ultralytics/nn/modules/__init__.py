@@ -25,7 +25,10 @@ from .custom_modules import (
     GeMHead512,
     GeM,
     BottleneckHead512,
-    SE
+    SE,
+    SpatialAttention,
+    ConvProj1x1,
+    DualPool
 )
     
 from .block import (
@@ -199,4 +202,7 @@ __all__ = (
     "GeM",
     "BottleneckHead512",
     "SE",
+    "SpatialAttention",
+    "ConvProj1x1",
+    "DualPool"
 )

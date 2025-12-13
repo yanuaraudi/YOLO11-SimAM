@@ -81,6 +81,9 @@ from ultralytics.nn.modules import (
     GeMHead512,
     BottleneckHead512,
     SE,
+    SpatialAttention,
+    ConvProj1x1,
+    DualPool,
     
 )
 from ultralytics.utils import DEFAULT_CFG_DICT, DEFAULT_CFG_KEYS, LOGGER, YAML, colorstr, emojis
