@@ -234,4 +234,20 @@ class DualPool(nn.Module):
     def forward(self, x):
         gap = F.adaptive_avg_pool2d(x, 1)
         gmp = F.adaptive_max_pool2d(x, 1)
-        return torch.cat([gap, gmp], dim=1)
+        return torch.cat([gap, gmp], dim=1)  # [B, 1024, 1, 1]
+
+class MLPClassifyHead(nn.Module):
+    def __init__(self, nc, c1=512, hidden=1024, dropout=0.5):
+        super().__init__()
+        self.pool = nn.AdaptiveAvgPool2d(1)
+        self.fc = nn.Sequential(
+            nn.Flatten(),
+            nn.Linear(c1, hidden),
+            nn.ReLU(inplace=True),
+            nn.Dropout(dropout),
+            nn.Linear(hidden, nc),
+        )
+
+    def forward(self, x):
+        x = self.pool(x)
+        return self.fc(x)

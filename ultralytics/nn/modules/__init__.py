@@ -28,7 +28,8 @@ from .custom_modules import (
     SE,
     SpatialAttention,
     ConvProj1x1,
-    DualPool
+    DualPool,
+    MLPClassifyHead
 )
     
 from .block import (
@@ -204,5 +205,6 @@ __all__ = (
     "SE",
     "SpatialAttention",
     "ConvProj1x1",
-    "DualPool"
+    "DualPool",
+    "MLPClassifyHead"
 )

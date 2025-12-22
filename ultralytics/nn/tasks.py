@@ -84,6 +84,7 @@ from ultralytics.nn.modules import (
     SpatialAttention,
     ConvProj1x1,
     DualPool,
+    MLPClassifyHead,
     
 )
 from ultralytics.utils import DEFAULT_CFG_DICT, DEFAULT_CFG_KEYS, LOGGER, YAML, colorstr, emojis
