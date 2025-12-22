@@ -14,8 +14,8 @@ backbone:
 
 # YOLO11n head
 head:
-  - [-1, 1, DualPool, [512]]
-  - [-1, 1, Classify, [nc]]
+  - [-1, 1, DualPoolClassifyHead, [nc]]
+
 
 
 
