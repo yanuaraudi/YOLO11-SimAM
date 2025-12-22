@@ -231,7 +231,7 @@ class ConvProj1x1(nn.Module):
         return self.act(self.bn(self.conv(x)))
 
 class DualPool(nn.Module):
-    def __init__(self, c1, *args, **kwargs):
+    def __init__(self, c1):
         super().__init__()
         self.c2 = c1 * 2  # tell YOLO output channels
 
