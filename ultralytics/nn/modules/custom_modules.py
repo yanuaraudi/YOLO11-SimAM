@@ -231,16 +231,15 @@ class ConvProj1x1(nn.Module):
         return self.act(self.bn(self.conv(x)))
 
 class DualPool(nn.Module):
-    def __init__(self, c1=512):
+    def __init__(self, c1, *args, **kwargs):
         super().__init__()
-        self.c2 = c1 * 2  # 🔴 IMPORTANT: tell YOLO output channels
+        self.c2 = c1 * 2  # tell YOLO output channels
 
     def forward(self, x):
         gap = F.adaptive_avg_pool2d(x, 1)
         gmp = F.adaptive_max_pool2d(x, 1)
         return torch.cat([gap, gmp], dim=1)
-
-
+    
 class MLPClassifyHead(nn.Module):
     def __init__(self, nc, c1=512, hidden=1024, dropout=0.5):
         super().__init__()
