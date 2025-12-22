@@ -30,7 +30,8 @@ from .custom_modules import (
     ConvProj1x1,
     DualPool,
     MLPClassifyHead,
-    ConvProj1x1Drop
+    ConvProj1x1Drop,
+    DualPoolClassifyHead
 )
     
 from .block import (
@@ -208,5 +209,6 @@ __all__ = (
     "ConvProj1x1",
     "DualPool",
     "MLPClassifyHead",
-    "ConvProj1x1Drop"
+    "ConvProj1x1Drop",
+    "DualPoolClassifyHead"
 )

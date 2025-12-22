@@ -240,6 +240,17 @@ class DualPool(nn.Module):
         gmp = F.adaptive_max_pool2d(x, 1)
         return torch.cat([gap, gmp], dim=1)
     
+class DualPoolClassifyHead(nn.Module):
+    def __init__(self, nc, c1=512):
+        super().__init__()
+        self.pool = DualPool(c1)
+        self.classifier = nn.Linear(c1 * 2, nc)
+
+    def forward(self, x):
+        x = self.pool(x)          # [B, 1024, 1, 1]
+        x = x.flatten(1)          # [B, 1024]
+        return self.classifier(x)
+
 class MLPClassifyHead(nn.Module):
     def __init__(self, nc, c1=512, hidden=1024, dropout=0.5):
         super().__init__()
