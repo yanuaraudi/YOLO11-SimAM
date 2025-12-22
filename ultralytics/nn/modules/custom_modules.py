@@ -251,3 +251,15 @@ class MLPClassifyHead(nn.Module):
     def forward(self, x):
         x = self.pool(x)
         return self.fc(x)
+
+class ConvProj1x1Drop(nn.Module):
+    def __init__(self, c, p=0.1):
+        super().__init__()
+        self.conv = nn.Conv2d(c, c, 1, bias=False)
+        self.bn = nn.BatchNorm2d(c)
+        self.act = nn.SiLU()
+        self.drop = nn.Dropout2d(p)
+
+    def forward(self, x):
+        return self.drop(self.act(self.bn(self.conv(x))))
+

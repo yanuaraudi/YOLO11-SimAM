@@ -85,6 +85,7 @@ from ultralytics.nn.modules import (
     ConvProj1x1,
     DualPool,
     MLPClassifyHead,
+    ConvProj1x1Drop,
     
 )
 from ultralytics.utils import DEFAULT_CFG_DICT, DEFAULT_CFG_KEYS, LOGGER, YAML, colorstr, emojis
