@@ -278,3 +278,33 @@ class ConvProj1x1Drop(nn.Module):
     def forward(self, x):
         return self.drop(self.act(self.bn(self.conv(x))))
 
+class ConvProjBN(nn.Module):
+    def __init__(self, c1=512):
+        super().__init__()
+        self.conv = nn.Conv2d(c1, c1, 1, bias=False)
+        self.bn = nn.BatchNorm2d(c1)
+
+    def forward(self, x):
+        return self.bn(self.conv(x))
+
+class ConvProjLowRank(nn.Module):
+    def __init__(self, c1=512, c_mid=256):
+        super().__init__()
+        self.net = nn.Sequential(
+            nn.Conv2d(c1, c_mid, 1, bias=False),
+            nn.ReLU(inplace=True),
+            nn.Conv2d(c_mid, c1, 1, bias=False),
+        )
+
+    def forward(self, x):
+        return self.net(x)
+
+class ConvProjResidual(nn.Module):
+    def __init__(self, c1=512):
+        super().__init__()
+        self.conv = nn.Conv2d(c1, c1, 1, bias=False)
+
+    def forward(self, x):
+        return x + self.conv(x)
+
+
