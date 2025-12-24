@@ -300,11 +300,56 @@ class ConvProjLowRank(nn.Module):
         return self.net(x)
 
 class ConvProjResidual(nn.Module):
-    def __init__(self, c1=512):
+    def __init__(self, c=512, alpha=0.3):
         super().__init__()
-        self.conv = nn.Conv2d(c1, c1, 1, bias=False)
+        self.conv = nn.Conv2d(c, c, 1, bias=False)
+        self.bn = nn.BatchNorm2d(c)
+        self.act = nn.ReLU(inplace=True)
+        self.alpha = alpha
+        self.c2 = c
 
     def forward(self, x):
-        return x + self.conv(x)
+        y = self.act(self.bn(self.conv(x)))
+        return x + self.alpha * y
+
+
+class ConvProjSE(nn.Module):
+    def __init__(self, c1=512, c2=512, r=16):
+        super().__init__()
+        self.proj = nn.Conv2d(c1, c2, 1, bias=False)
+        self.bn = nn.BatchNorm2d(c2)
+        self.act = nn.ReLU(inplace=True)
+
+        c_ = max(c2 // r, 1)
+        self.se = nn.Sequential(
+            nn.AdaptiveAvgPool2d(1),
+            nn.Conv2d(c2, c_, 1),
+            nn.ReLU(inplace=True),
+            nn.Conv2d(c_, c2, 1),
+            nn.Sigmoid(),
+        )
+
+        self.c2 = c2
+
+    def forward(self, x):
+        x = self.act(self.bn(self.proj(x)))
+        return x * self.se(x)
+
+class GeMConvHead(nn.Module):
+    def __init__(self, c=512):
+        super().__init__()
+        self.p = nn.Parameter(torch.ones(1) * 3)
+        self.eps = 1e-6
+        self.conv = nn.Conv2d(c, c, 1, bias=False)
+        self.bn = nn.BatchNorm2d(c)
+        self.c2 = c
+
+    def gem(self, x):
+        x = torch.clamp(x, min=self.eps)
+        return torch.mean(x ** self.p, dim=(2, 3), keepdim=True) ** (1.0 / self.p)
+
+    def forward(self, x):
+        x = self.gem(x)
+        return self.bn(self.conv(x))
 
 

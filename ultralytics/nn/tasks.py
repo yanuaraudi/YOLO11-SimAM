@@ -89,6 +89,9 @@ from ultralytics.nn.modules import (
     DualPoolClassifyHead,
     ConvProjBN,
     ConvProjResidual,
+    ConvProjSE,
+    GeMConvHead,
+    
     
     
 )
