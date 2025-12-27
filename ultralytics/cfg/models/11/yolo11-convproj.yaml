@@ -48,9 +48,9 @@ head:
   - [-1, 2, C3k2, [1024, True]] # 22 (P5/32-large)
 
     # --- ConvProj per scale ---
-  - [16, 1, ConvProj, [256]]   # P3
-  - [19, 1, ConvProj, [512]]   # P4
-  - [22, 1, ConvProj, [1024]]  # P5
+  - [16, 1, ConvProj, []]
+  - [19, 1, ConvProj, []]
+  - [22, 1, ConvProj, []]
 
   # --- Detect ---
   - [[-3, -2, -1], 1, Detect, [nc]]

@@ -366,12 +366,18 @@ class ConvProjDetect(nn.Module):
     
 
 class ConvProj(nn.Module):
-    def __init__(self, c):
+    def __init__(self, c1=None):
         super().__init__()
-        self.conv = nn.Conv2d(c, c, 1, bias=False)
-        self.bn = nn.BatchNorm2d(c)
+        self.conv = None
+        self.bn = None
         self.act = nn.SiLU()
-        self.c2 = c  # REQUIRED by Ultralytics
+        self.c2 = c1  # Ultralytics will overwrite this
 
     def forward(self, x):
+        if self.conv is None:
+            c = x.shape[1]
+            self.conv = nn.Conv2d(c, c, 1, bias=False).to(x.device)
+            self.bn = nn.BatchNorm2d(c).to(x.device)
+            self.c2 = c
         return self.act(self.bn(self.conv(x)))
+
