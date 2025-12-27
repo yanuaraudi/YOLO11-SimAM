@@ -91,6 +91,7 @@ from ultralytics.nn.modules import (
     ConvProjResidual,
     ConvProjSE,
     GeMConvHead,
+    ConvProjDetect
     
     
     

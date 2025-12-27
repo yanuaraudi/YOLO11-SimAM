@@ -351,5 +351,27 @@ class GeMConvHead(nn.Module):
     def forward(self, x):
         x = self.gem(x)
         return self.bn(self.conv(x))
+    
+class ConvProjDetect(nn.Module):
+    def __init__(self, c1, c2=None):
+        super().__init__()
+        c2 = c2 or c1
+        self.conv = nn.Conv2d(c1, c2, 1, bias=False)
+        self.bn = nn.BatchNorm2d(c2)
+        self.act = nn.SiLU()
+        self.c2 = c2
 
+    def forward(self, x):
+        return self.act(self.bn(self.conv(x)))
+    
 
+class ConvProj(nn.Module):
+    def __init__(self, c):
+        super().__init__()
+        self.conv = nn.Conv2d(c, c, 1, bias=False)
+        self.bn = nn.BatchNorm2d(c)
+        self.act = nn.SiLU()
+        self.c2 = c  # REQUIRED by Ultralytics
+
+    def forward(self, x):
+        return self.act(self.bn(self.conv(x)))
