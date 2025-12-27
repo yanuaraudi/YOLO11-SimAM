@@ -37,7 +37,8 @@ from .custom_modules import (
     ConvProjResidual,
     ConvProjSE,
     GeMConvHead,
-    ConvProjDetect
+    ConvProjDetect,
+    ConvProj
 )
     
 from .block import (
@@ -222,5 +223,6 @@ __all__ = (
     "ConvProjResidual",
     "ConvProjSE",
     "GeMConvHead",
-    "ConvProjDetect"
+    "ConvProjDetect",
+    "ConvProj"
 )
