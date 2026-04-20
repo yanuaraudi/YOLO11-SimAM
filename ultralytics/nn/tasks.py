@@ -10,6 +10,7 @@ from pathlib import Path
 import torch
 import torch.nn as nn
 
+from ultralytics.nn.modules.resnet_backbone import ResNet18Stage
 from ultralytics.nn.modules.custom_modules import CBAMv2 as _CBAMv2
 CBAMv2 = _CBAMv2
 
@@ -92,7 +93,8 @@ from ultralytics.nn.modules import (
     ConvProjSE,
     GeMConvHead,
     ConvProjDetect,
-    ConvProj
+    ConvProj,
+    ResNet18Stage
     
     
     
@@ -1760,6 +1762,8 @@ def parse_model(d, ch, verbose=True):
             c2 = args[0]
             c1 = ch[f]
             args = [*args[1:]]
+        elif m is ResNet18Stage:
+            c2 = [64, 64, 128, 256, 512][args[0]]  # output channels per stage index
         elif getattr(m, "__name__", "") == "CBAM":
             # YAML forms supported:
             # - CBAM, []        -> kernel_size default 7

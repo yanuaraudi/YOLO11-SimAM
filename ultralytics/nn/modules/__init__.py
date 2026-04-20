@@ -40,6 +40,8 @@ from .custom_modules import (
     ConvProjDetect,
     ConvProj
 )
+
+from .resnet_backbone import ResNet18Stage
     
 from .block import (
     C1,
@@ -224,5 +226,6 @@ __all__ = (
     "ConvProjSE",
     "GeMConvHead",
     "ConvProjDetect",
-    "ConvProj"
+    "ConvProj",
+    "ResNet18Stage",
 )
