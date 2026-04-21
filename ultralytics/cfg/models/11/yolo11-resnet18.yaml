@@ -6,8 +6,8 @@
 
 # Parameters
 nc: 3
-depth_multiple: 1.0
-width_multiple: 1.0
+scales:
+  n: [1.0, 1.0, 1024]  # depth=1.0, width=1.0 → no scaling at all
 
 # ResNet18 backbone
 backbone:
