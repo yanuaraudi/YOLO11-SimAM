@@ -5,41 +5,36 @@
 # Task docs: https://docs.ultralytics.com/tasks/detect
 
 # Parameters
-nc: 3 # number of classes
-scales: # model compound scaling constants, i.e. 'model=yolo11n.yaml' will call yolo11.yaml with scale 'n'
-  # [depth, width, max_channels]
-  n: [0.50, 0.25, 1024] # summary: 181 layers, 2624080 parameters, 2624064 gradients, 6.6 GFLOPs
-  s: [0.50, 0.50, 1024] # summary: 181 layers, 9458752 parameters, 9458736 gradients, 21.7 GFLOPs
-  m: [0.50, 1.00, 512] # summary: 231 layers, 20114688 parameters, 20114672 gradients, 68.5 GFLOPs
-  l: [1.00, 1.00, 512] # summary: 357 layers, 25372160 parameters, 25372144 gradients, 87.6 GFLOPs
-  x: [1.00, 1.50, 512] # summary: 357 layers, 56966176 parameters, 56966160 gradients, 196.0 GFLOPs
+nc: 3
+depth_multiple: 1.0
+width_multiple: 1.0
 
-# YOLO11n backbone
+# ResNet18 backbone
 backbone:
-  - [-1, 1, ResNet18Stage, [0]]   # 0 - stem (stride 4)
-  - [-1, 1, ResNet18Stage, [1]]   # 1 - layer1, P2
-  - [-1, 1, ResNet18Stage, [2]]   # 2 - layer2, P3 (128ch)
-  - [-1, 1, ResNet18Stage, [3]]   # 3 - layer3, P4 (256ch)
-  - [-1, 1, ResNet18Stage, [4]]   # 4 - layer4, P5 (512ch)
-  - [-1, 1, SPPF, [512, 5]]       # 5
-  - [-1, 2, C2PSA, [512]]         # 6
+  - [-1, 1, ResNet18Stage, [0]]   # 0 - stem, 64ch, stride 4
+  - [-1, 1, ResNet18Stage, [1]]   # 1 - layer1, 64ch, stride 4
+  - [-1, 1, ResNet18Stage, [2]]   # 2 - layer2, 128ch, stride 8  ← P3
+  - [-1, 1, ResNet18Stage, [3]]   # 3 - layer3, 256ch, stride 16 ← P4
+  - [-1, 1, ResNet18Stage, [4]]   # 4 - layer4, 512ch, stride 32 ← P5
+  - [-1, 1, SPPF, [512, 5]]       # 5 - 512ch
+  - [-1, 2, C2PSA, [512]]         # 6 - 512ch
 
-# YOLO11n head
+# Detection head — channels must match backbone exactly
 head:
-  - [-1, 1, nn.Upsample, [None, 2, "nearest"]]               # 6  - upsample P5
-  - [[-1, 2], 1, Concat, [1]]                                # 7  - cat with P4 (256+512=768)
-  - [-1, 2, C3k2, [256, False]]                              # 8
+  - [-1, 1, nn.Upsample, [None, 2, "nearest"]]   # 7  - 512ch, stride 16
+  - [[-1, 3], 1, Concat, [1]]                    # 8  - concat P4: 512+256 = 768ch
+  - [-1, 2, C3k2, [256, False]]                  # 9  - 256ch
 
-  - [-1, 1, nn.Upsample, [None, 2, "nearest"]]               # 9  - upsample
-  - [[-1, 1], 1, Concat, [1]]                                # 10 - cat with P3 (128+256=384)
-  - [-1, 2, C3k2, [128, False]]                              # 11 (P3/8-small)
+  - [-1, 1, nn.Upsample, [None, 2, "nearest"]]   # 10 - 256ch, stride 8
+  - [[-1, 2], 1, Concat, [1]]                    # 11 - concat P3: 256+128 = 384ch
+  - [-1, 2, C3k2, [128, False]]                  # 12 - 128ch (P3/8-small)
 
-  - [-1, 1, Conv, [128, 3, 2]]                               # 12 - downsample
-  - [[-1, 8], 1, Concat, [1]]                                # 13 - cat head P4
-  - [-1, 2, C3k2, [256, False]]                              # 14 (P4/16-medium)
+  - [-1, 1, Conv, [128, 3, 2]]                   # 13 - 128ch, stride 16
+  - [[-1, 9], 1, Concat, [1]]                    # 14 - concat: 128+256 = 384ch
+  - [-1, 2, C3k2, [256, False]]                  # 15 - 256ch (P4/16-medium)
 
-  - [-1, 1, Conv, [256, 3, 2]]                               # 15 - downsample
-  - [[-1, 5], 1, Concat, [1]]                                # 16 - cat head P5
-  - [-1, 2, C3k2, [512, True]]                               # 17 (P5/32-large)
+  - [-1, 1, Conv, [256, 3, 2]]                   # 16 - 256ch, stride 32
+  - [[-1, 6], 1, Concat, [1]]                    # 17 - concat: 256+512 = 768ch
+  - [-1, 2, C3k2, [512, True]]                   # 18 - 512ch (P5/32-large)
 
-  - [[11, 14, 17], 1, Detect, [nc]]                          # Detect(P3, P4, P5)
+  - [[12, 15, 18], 1, Detect, [nc]]              # Detect(P3, P4, P5)
